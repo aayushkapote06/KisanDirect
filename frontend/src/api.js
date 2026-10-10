@@ -3,7 +3,8 @@
  * Handles all HTTP requests to FastAPI backend with JWT authorization
  */
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Uses production environment variable when deployed, defaults to localhost in development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 export const api = {
   // Helper for requests

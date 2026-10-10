@@ -77,6 +77,15 @@ def on_startup():
             print("[WARNING] Change this password in production!")
         else:
             print("[INFO] Admin account already exists.")
+            
+        # If products table is empty (such as on first cloud deployment), auto-seed demo catalog
+        product_count = db.query(Product).count()
+        if product_count == 0:
+            print("[INFO] Database empty - auto-seeding produce catalog and demo accounts...")
+            from app.seed import seed_database
+            seed_database()
+    except Exception as e:
+        print(f"[STARTUP WARNING] Database startup check: {e}")
     finally:
         db.close()
 
