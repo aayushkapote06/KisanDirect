@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Search, Filter, ShoppingBag, CheckCircle, Info, ShieldAlert } from 'lucide-react';
+import { Search, Filter, ShoppingBag, CheckCircle, Info, ShieldAlert, Sprout } from 'lucide-react';
 
 const CATEGORIES = [
-  'All', 'Vegetables', 'Grains', 'Fruits', 'Pulses', 'Spices', 'Dairy', 'Oilseeds'
+  'All', 'Vegetables', 'Pulses', 'Fruits', 'Grains', 'Oilseeds', 'Spices', 'Dairy'
 ];
 
 export default function Marketplace() {
@@ -102,7 +102,7 @@ export default function Marketplace() {
           <Search size={18} className="search-icon" />
           <input
             type="text"
-            placeholder="Search fresh produce (e.g. Tomatoes, Basmati Rice, Potatoes)..."
+            placeholder="Search fresh produce (e.g. Tomatoes, Basmati Rice, Toor Dal, Strawberries)..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -142,7 +142,27 @@ export default function Marketplace() {
 
             return (
               <div key={prod.id} className="product-card">
-                <div className="product-category-tag">{prod.category}</div>
+                {/* Produce Photo Banner */}
+                <div className="product-image-container">
+                  {prod.image ? (
+                    <img
+                      src={prod.image}
+                      alt={prod.name}
+                      className="product-img"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const fallback = e.target.parentElement.querySelector('.product-img-fallback');
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className="product-img-fallback" style={{ display: prod.image ? 'none' : 'flex' }}>
+                    <Sprout size={36} />
+                  </div>
+                  <span className="product-category-tag-floating">{prod.category}</span>
+                </div>
+
                 <div className="product-body">
                   <h3 className="product-title">{prod.name}</h3>
                   <p className="product-description">{prod.description || 'Freshly harvested produce directly from the farm.'}</p>
