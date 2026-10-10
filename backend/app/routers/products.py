@@ -117,6 +117,42 @@ def create_product(
     The farmer_id is automatically set to the logged-in farmer's ID.
     A farmer cannot list products under another farmer's name.
     """
+    # Determine appropriate produce image
+    image_url = None
+    lower_name = product_data.name.lower()
+    keyword_map = {
+        "paddy": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80",
+        "rice": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80",
+        "wheat": "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=80",
+        "tomato": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80",
+        "onion": "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80",
+        "potato": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=80",
+        "strawberry": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=600&auto=format&fit=crop&q=80",
+        "mango": "https://images.unsplash.com/photo-1553279768-865429fa0078?w=600&auto=format&fit=crop&q=80",
+        "apple": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&auto=format&fit=crop&q=80",
+        "dal": "https://images.unsplash.com/photo-1585994192701-f1a505c817ea?w=600&auto=format&fit=crop&q=80",
+        "chana": "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=600&auto=format&fit=crop&q=80",
+        "rajma": "https://images.unsplash.com/photo-1551462147-37885acc36f1?w=600&auto=format&fit=crop&q=80",
+        "moong": "https://images.unsplash.com/photo-1610450919844-4b533318b76c?w=600&auto=format&fit=crop&q=80",
+        "mustard": "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=600&auto=format&fit=crop&q=80",
+        "ghee": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=600&auto=format&fit=crop&q=80",
+    }
+    category_defaults = {
+        "Grains": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80",
+        "Vegetables": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80",
+        "Fruits": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&auto=format&fit=crop&q=80",
+        "Pulses": "https://images.unsplash.com/photo-1585994192701-f1a505c817ea?w=600&auto=format&fit=crop&q=80",
+        "Oilseeds": "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=600&auto=format&fit=crop&q=80",
+        "Spices": "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600&auto=format&fit=crop&q=80",
+        "Dairy": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=600&auto=format&fit=crop&q=80",
+    }
+    for kw, url in keyword_map.items():
+        if kw in lower_name:
+            image_url = url
+            break
+    if not image_url:
+        image_url = category_defaults.get(product_data.category, category_defaults["Vegetables"])
+
     new_product = Product(
         farmer_id=current_user.id,
         name=product_data.name,
@@ -126,6 +162,7 @@ def create_product(
         unit=product_data.unit,
         quantity_available=product_data.quantity_available,
         min_order_quantity=product_data.min_order_quantity,
+        image=image_url,
     )
     
     db.add(new_product)
