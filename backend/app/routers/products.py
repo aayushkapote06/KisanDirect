@@ -222,11 +222,13 @@ def update_product(
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_product(
     product_id: int,
-    current_user: User = Depends(require_role(["farmer"])),
+    current_user: User = Depends(require_role(["farmer", "admin"])),
     db: Session = Depends(get_db),
 ):
     """
-    Delete a product listing. Only the farmer who owns it can delete it.
+    Delete a product listing.
+    - Farmer can delete their OWN listed products.
+    - Administrator can delete ANY product on the platform.
     """
     product = db.query(Product).filter(Product.id == product_id).first()
     
@@ -236,7 +238,8 @@ def delete_product(
             detail="Product not found."
         )
     
-    if product.farmer_id != current_user.id:
+    # Check permissions: Admin can delete any product, Farmer can only delete their own
+    if current_user.role != "admin" and product.farmer_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You can only delete your own products."

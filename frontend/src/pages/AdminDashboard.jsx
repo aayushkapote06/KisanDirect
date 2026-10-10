@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Users, ShoppingCart, DollarSign, UserCheck, UserX, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Users, ShoppingCart, DollarSign, UserCheck, UserX, AlertCircle, CheckCircle2, Trash2, Package } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -16,14 +17,16 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       setError('');
-      const [statsData, usersData, ordersData] = await Promise.all([
+      const [statsData, usersData, ordersData, productsData] = await Promise.all([
         api.getAdminStats(),
         api.getAdminUsers(),
         api.getAdminOrders(),
+        api.getProducts(),
       ]);
       setStats(statsData);
       setUsers(usersData);
       setOrders(ordersData);
+      setProducts(productsData);
     } catch (err) {
       setError(err.message || 'Failed to load administrative data');
     } finally {
@@ -50,13 +53,27 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleAdminDeleteProduct = async (productId, productName, farmerName) => {
+    if (!window.confirm(`[ADMIN ACTION] Are you sure you want to permanently delete listing "${productName}" by ${farmerName}?`)) return;
+
+    try {
+      setError('');
+      await api.deleteProduct(productId);
+      setSuccessMsg(`[Admin] Successfully removed "${productName}" from the platform.`);
+      loadAdminData();
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (err) {
+      setError(err.message || 'Failed to delete product');
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="dashboard-header">
         <div>
           <h1>Platform Administration</h1>
           <p className="page-subtitle">
-            System governance, multi-role user management, account moderation, and transaction monitoring.
+            System governance, multi-role user management, catalog moderation, and transaction monitoring.
           </p>
         </div>
       </div>
@@ -105,6 +122,59 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Product Catalog Moderation Table */}
+      <div className="card dashboard-table-card">
+        <h3>Product Catalog Moderation & Removal ({products.length} Items Listed)</h3>
+        <p className="page-subtitle" style={{ marginBottom: '1rem' }}>
+          Administrators have global authority to remove fraudulent, out-of-stock, or policy-violating listings.
+        </p>
+        <div className="table-responsive">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Item ID</th>
+                <th>Produce Name</th>
+                <th>Category</th>
+                <th>Listed by Farmer</th>
+                <th>Price</th>
+                <th>Available Qty</th>
+                <th>Status</th>
+                <th>Admin Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr key={p.id}>
+                  <td>#{p.id}</td>
+                  <td><strong>{p.name}</strong></td>
+                  <td><span className="badge">{p.category}</span></td>
+                  <td>
+                    <span>{p.farmer_name || 'Farmer'}</span>
+                    {p.farmer_city && <span className="stop-addr">📍 {p.farmer_city}</span>}
+                  </td>
+                  <td>₹{p.price} / {p.unit}</td>
+                  <td>{p.quantity_available} {p.unit}</td>
+                  <td>
+                    <span className={`badge ${p.is_available ? 'badge-success' : 'badge-danger'}`}>
+                      {p.is_available ? 'Available' : 'Unavailable'}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleAdminDeleteProduct(p.id, p.name, p.farmer_name)}
+                      className="btn btn-sm btn-danger-outline"
+                      title="Permanently remove listing from marketplace"
+                    >
+                      <Trash2 size={14} /> Remove Item
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* User Management Table */}
       <div className="card dashboard-table-card">

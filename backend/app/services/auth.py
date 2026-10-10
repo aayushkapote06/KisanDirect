@@ -28,21 +28,24 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 
+import bcrypt
+
 # ----- PASSWORD HASHING -----
-
-# This creates a password hasher using the "bcrypt" algorithm
-# bcrypt is slow on purpose - it makes brute-force attacks impractical
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def hash_password(password: str) -> str:
     """Convert a plain text password into a hashed version."""
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Check if a plain text password matches its hashed version."""
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode("utf-8")[:72]
+    try:
+        return bcrypt.checkpw(pwd_bytes, hashed_password.encode("utf-8"))
+    except Exception:
+        return False
 
 
 # ----- JWT TOKEN HANDLING -----

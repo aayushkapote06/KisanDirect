@@ -149,3 +149,54 @@ def test_route_optimization():
     assert "distance_saved_km" in data
     assert data["distance_saved_km"] > 0
     assert len(data["optimized_stops"]) == 4  # depot + 3 stops
+
+
+def test_product_deletion_by_farmer_and_admin():
+    # 1. Login as Farmer
+    farmer_login = client.post(
+        "/api/auth/login",
+        json={"email": "testfarmer@marketplace.com", "password": "farmerpassword123"},
+    )
+    farmer_token = farmer_login.json()["access_token"]
+    farmer_headers = {"Authorization": f"Bearer {farmer_token}"}
+
+    # 2. Farmer creates two test products
+    p1 = client.post(
+        "/api/products",
+        json={
+            "name": "Deletion Test Crop 1",
+            "category": "Vegetables",
+            "price": 25.0,
+            "unit": "kg",
+            "quantity_available": 100.0,
+        },
+        headers=farmer_headers,
+    ).json()
+
+    p2 = client.post(
+        "/api/products",
+        json={
+            "name": "Deletion Test Crop 2",
+            "category": "Grains",
+            "price": 40.0,
+            "unit": "kg",
+            "quantity_available": 200.0,
+        },
+        headers=farmer_headers,
+    ).json()
+
+    # 3. Farmer can delete their OWN product (p1)
+    del_resp1 = client.delete(f"/api/products/{p1['id']}", headers=farmer_headers)
+    assert del_resp1.status_code == 204
+
+    # 4. Login as Admin
+    admin_login = client.post(
+        "/api/auth/login",
+        json={"email": "admin@marketplace.com", "password": "admin123"},
+    )
+    admin_token = admin_login.json()["access_token"]
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
+    # 5. Admin can delete ANY product (p2 created by the farmer)
+    del_resp2 = client.delete(f"/api/products/{p2['id']}", headers=admin_headers)
+    assert del_resp2.status_code == 204

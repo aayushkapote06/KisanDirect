@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Search, Filter, ShoppingBag, CheckCircle, Info, ShieldAlert, Sprout } from 'lucide-react';
+import { Search, Filter, ShoppingBag, CheckCircle, Info, ShieldAlert, Sprout, Trash2 } from 'lucide-react';
 
 const CATEGORIES = [
   'All', 'Vegetables', 'Pulses', 'Fruits', 'Grains', 'Oilseeds', 'Spices', 'Dairy'
@@ -53,6 +53,24 @@ export default function Marketplace() {
     addToCart(product, qty);
     setAddedNotice(`Added ${qty} ${product.unit} of "${product.name}" to cart!`);
     setTimeout(() => setAddedNotice(''), 3000);
+  };
+
+  const handleDeleteProduct = async (productId, productName) => {
+    const confirmMsg = user?.role === 'admin'
+      ? `[Admin Action] Are you sure you want to permanently remove "${productName}" from the platform?`
+      : `Are you sure you want to remove your listing "${productName}"?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      setError('');
+      await api.deleteProduct(productId);
+      setAddedNotice(`Listing "${productName}" has been removed.`);
+      fetchProducts();
+      setTimeout(() => setAddedNotice(''), 3000);
+    } catch (err) {
+      setError(err.message || 'Failed to remove product');
+    }
   };
 
   return (
@@ -215,6 +233,19 @@ export default function Marketplace() {
                   ) : (
                     <div className="role-restriction-note">
                       <Info size={14} /> Logged in as {user.role}. Sign in as Buyer to purchase.
+                    </div>
+                  )}
+
+                  {/* Farmer (own item) or Admin (any item) removal button */}
+                  {user && (user.role === 'admin' || (user.role === 'farmer' && user.id === prod.farmer_id)) && (
+                    <div style={{ marginTop: '0.65rem', display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        onClick={() => handleDeleteProduct(prod.id, prod.name)}
+                        className="btn btn-sm btn-danger-outline"
+                        title={user.role === 'admin' ? "Admin: Remove listing" : "Remove my listing"}
+                      >
+                        <Trash2 size={13} /> {user.role === 'admin' ? 'Admin Remove' : 'Remove My Listing'}
+                      </button>
                     </div>
                   )}
                 </div>

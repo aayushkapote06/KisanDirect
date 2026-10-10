@@ -298,10 +298,10 @@ export default function FarmerDashboard() {
                     <td>
                       <button
                         onClick={() => handleDeleteProduct(p.id, p.name)}
-                        className="btn-icon-danger"
-                        title="Delete listing"
+                        className="btn btn-sm btn-danger-outline"
+                        title="Remove listing from marketplace"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} /> Remove Listing
                       </button>
                     </td>
                   </tr>
