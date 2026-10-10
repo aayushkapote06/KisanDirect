@@ -8,6 +8,7 @@ import FarmerDashboard from './pages/FarmerDashboard';
 import BuyerOrders from './pages/BuyerOrders';
 import LogisticsDashboard from './pages/LogisticsDashboard';
 import AIForecasting from './pages/AIForecasting';
+import MandiRates from './pages/MandiRates';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={<Marketplace />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/mandi-rates" element={<MandiRates />} />
           <Route path="/forecasts" element={<AIForecasting />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

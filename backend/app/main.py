@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base, SessionLocal
 from app.models import User, Product, Order, OrderItem, Delivery
-from app.routers import auth, products, orders, admin, logistics, forecasts
+from app.routers import auth, products, orders, admin, logistics, forecasts, mandi
 from app.services.auth import hash_password
 
 # Create the FastAPI application
@@ -46,6 +46,7 @@ app.include_router(orders.router)
 app.include_router(admin.router)
 app.include_router(logistics.router)
 app.include_router(forecasts.router)
+app.include_router(mandi.router)
 
 
 # ----- STARTUP EVENT -----

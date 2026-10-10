@@ -164,4 +164,21 @@ export const api = {
   async getAdminOrders() {
     return this.request('/admin/orders');
   },
+
+  // Mandi Market Rates Endpoints
+  async getMandiStates() {
+    return this.request('/mandi/states');
+  },
+
+  async getMandiCommodities() {
+    return this.request('/mandi/commodities');
+  },
+
+  async getMandiRates(params = {}) {
+    const query = new URLSearchParams();
+    if (params.state && params.state !== 'All') query.append('state', params.state);
+    if (params.commodity && params.commodity !== 'All') query.append('commodity', params.commodity);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    return this.request(`/mandi/rates${qs}`);
+  },
 };

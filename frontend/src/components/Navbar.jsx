@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingCart, LogOut, User, Sprout, TrendingUp, Truck, ShieldCheck, Package } from 'lucide-react';
+import { ShoppingCart, LogOut, User, Sprout, TrendingUp, Truck, ShieldCheck, Package, Landmark } from 'lucide-react';
 
 export default function Navbar() {
   const { user, cart, logout } = useAuth();
@@ -26,6 +26,9 @@ export default function Navbar() {
 
       <nav className="navbar-links">
         <Link to="/" className="nav-link">Marketplace</Link>
+        <Link to="/mandi-rates" className="nav-link">
+          <Landmark size={16} /> Mandi Rates
+        </Link>
         <Link to="/forecasts" className="nav-link">
           <TrendingUp size={16} /> AI Demand Forecast
         </Link>
